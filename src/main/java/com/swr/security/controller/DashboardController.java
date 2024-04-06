@@ -15,19 +15,19 @@ import java.security.Principal;
 public class DashboardController {
 
     @GetMapping(path = "/user")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('READ', 'WRITE', 'DELETE')")
     public ResponseEntity<String> getUserData(Authentication authentication) {
         return ResponseEntity.ok("Welcome use - "+authentication.getName());
     }
 
     @GetMapping(path = "/manager")
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('READ', 'WRITE')")
     public ResponseEntity<String> getManagerData(Principal principal) {
         return ResponseEntity.ok("Manager::"+principal.getName());
     }
 
     @GetMapping(path = "/admin")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('DELETE')")
     public ResponseEntity<String> getAdminData(@RequestParam("message") String message, Principal principal) {
         return ResponseEntity.ok("Admin::"+principal.getName()+" has this message::"+message);
     }

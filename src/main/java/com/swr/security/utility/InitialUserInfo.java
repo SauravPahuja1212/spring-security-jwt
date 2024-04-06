@@ -49,7 +49,7 @@ public class InitialUserInfo implements CommandLineRunner {
 
         Role role = new Role();
         role.setRoleName("ROLE_USER");
-        role.setRoleType(RoleConstant.ROLE_USER);
+        role.setRoleType(RoleConstant.ROLE_TYPE_USER);
 
         user.setUserRoles(List.of(role));
         userInfoJpaRepository.save(user.convertToEntity());
@@ -65,11 +65,11 @@ public class InitialUserInfo implements CommandLineRunner {
 
         Role roleAdmin = new Role();
         roleAdmin.setRoleName("ROLE_ADMIN");
-        roleAdmin.setRoleType(RoleConstant.ROLE_ADMIN);
+        roleAdmin.setRoleType(RoleConstant.ROLE_TYPE_ADMIN);
 
         Role roleUser = new Role();
         roleUser.setRoleName("ROLE_USER");
-        roleUser.setRoleType(RoleConstant.ROLE_USER);
+        roleUser.setRoleType(RoleConstant.ROLE_TYPE_USER);
 
         user.setUserRoles(List.of(roleAdmin, roleUser));
         userInfoJpaRepository.save(user.convertToEntity());
@@ -85,11 +85,11 @@ public class InitialUserInfo implements CommandLineRunner {
 
         Role roleManager = new Role();
         roleManager.setRoleName("ROLE_MANAGER");
-        roleManager.setRoleType(RoleConstant.ROLE_MANAGER);
+        roleManager.setRoleType(RoleConstant.ROLE_TYPE_MANAGER);
 
         Role roleUser = new Role();
         roleUser.setRoleName("ROLE_USER");
-        roleUser.setRoleType(RoleConstant.ROLE_USER);
+        roleUser.setRoleType(RoleConstant.ROLE_TYPE_USER);
 
         user.setUserRoles(List.of(roleManager, roleUser));
         userInfoJpaRepository.save(user.convertToEntity());
