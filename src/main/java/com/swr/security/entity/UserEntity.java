@@ -34,8 +34,11 @@ public class UserEntity {
     @Column(name = DatabaseConstant.User.COLUMN_PASSWORD, nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RoleEntity> userRoles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<RefreshTokenEntity> refreshTokenEntities;
 
     public User convertToModel() {
         User user = new User();

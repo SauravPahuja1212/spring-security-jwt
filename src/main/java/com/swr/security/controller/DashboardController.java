@@ -27,7 +27,7 @@ public class DashboardController {
     }
 
     @GetMapping(path = "/admin")
-    @PreAuthorize("hasAuthority('DELETE')")
+    @PreAuthorize("hasAnyAuthority('DELETE')")
     public ResponseEntity<String> getAdminData(@RequestParam("message") String message, Principal principal) {
         return ResponseEntity.ok("Admin::"+principal.getName()+" has this message::"+message);
     }

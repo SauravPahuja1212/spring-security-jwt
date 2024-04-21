@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,22 +40,39 @@ public class JwtTokenGenerator {
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }
 
+    public String generateRefreshToken(Authentication authentication) {
+        log.info("Generating refersh token for user :: " + authentication.getName());
+
+        JwtClaimsSet jwtClaimsSet = JwtClaimsSet.builder()
+                .issuer("swr")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(15, ChronoUnit.DAYS))
+                .subject(authentication.getName())
+                .claim("scope", "REFRESH_TOKEN")
+                .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
+    }
+
     private List<String> getPermissionsForRoles(List<String> roles) {
+        //Initialized with default size of max permissions available in system
+        var permissions = new ArrayList<String>(RoleConstant.ROLE_ADMIN_PERMISSIONS.size());
+
         for(var role : roles) {
-            if(role.equalsIgnoreCase(RoleConstant.ROLE_NAME_USER)) {
-                return RoleConstant.ROLE_USER_PERMISSIONS;
+            if(role.equalsIgnoreCase(RoleConstant.ROLE_NAME_ADMIN)) {
+                permissions.addAll(RoleConstant.ROLE_ADMIN_PERMISSIONS);
             }
 
             if(role.equalsIgnoreCase(RoleConstant.ROLE_NAME_MANAGER)) {
-                return RoleConstant.ROLE_MANAGER_PERMISSIONS;
+                permissions.addAll(RoleConstant.ROLE_MANAGER_PERMISSIONS);
             }
 
-            if(role.equalsIgnoreCase(RoleConstant.ROLE_NAME_ADMIN)) {
-                return RoleConstant.ROLE_ADMIN_PERMISSIONS;
+            if(role.equalsIgnoreCase(RoleConstant.ROLE_NAME_USER)) {
+                permissions.addAll(RoleConstant.ROLE_USER_PERMISSIONS);
             }
         }
 
-        return Collections.emptyList();
+        return permissions;
     }
 
     private List<String> getRolesOfUser(Authentication authentication) {

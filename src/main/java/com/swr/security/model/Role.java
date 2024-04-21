@@ -11,6 +11,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class Role {
 
     private UUID roleId;

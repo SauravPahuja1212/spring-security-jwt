@@ -3,6 +3,7 @@ package com.swr.security.constant;
 public final class DatabaseConstant {
 
     public static final class User {
+
         public static final String TABLE_NAME = "USER_INFO";
         public static final String COLUMN_USER_ID = "USER_ID";
         public static final String COLUMN_FIRST_NAME = "FIRST_NAME";
@@ -18,5 +19,14 @@ public final class DatabaseConstant {
         public static final String COLUMN_ROLE_ID = "ROLE_ID";
         public static final String COLUMN_ROLE_NAME = "ROLE_NAME";
         public static final String COLUMN_ROLE_TYPE = "ROLE_TYPE";
+    }
+
+    public static final class RefreshEntity {
+
+        public static final String TABLE_NAME = "REFRESH_TOKEN";
+        public static final String COLUMN_ID = "ID";
+        public static final String COLUMN_REFRESH_TOKEN = "REFRESH_TOKEN";
+        public static final String COLUMN_REVOKED = "REVOKED";
+        public static final String COLUMN_USER_ID = "USER_ID";
     }
 }

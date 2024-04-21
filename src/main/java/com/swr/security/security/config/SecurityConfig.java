@@ -6,7 +6,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.swr.security.security.filter.JwtAccessTokenFilter;
+import com.swr.security.security.service.LogoutService;
 import com.swr.security.security.service.UserConfigService;
+import com.swr.security.utility.JwtTokenUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -31,6 +35,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
@@ -43,6 +48,8 @@ public class SecurityConfig {
 
     private final UserConfigService userSecurityConfig;
     private final RSAKeyRecord rsaKeyRecord;
+    private final JwtTokenUtils jwtTokenUtils;
+    private final LogoutService logoutService;
 
     @Bean
     @Order(1)
@@ -69,6 +76,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils, userSecurityConfig)
+                        , UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout.logoutUrl("/api/logout")
+                        .addLogoutHandler(logoutService)
+                        .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                )
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:apiSecurityFilterChain] Exception due to :{}",ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
