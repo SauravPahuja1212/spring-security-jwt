@@ -2,6 +2,7 @@ package com.swr.security.service;
 
 import com.swr.security.dto.AuthResponseDTO;
 import com.swr.security.dto.TokenType;
+import com.swr.security.dto.UserRegistrationDTO;
 import com.swr.security.entity.RefreshTokenEntity;
 import com.swr.security.entity.UserEntity;
 import com.swr.security.repository.RefreshTokenJpaRepository;
@@ -16,9 +17,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.text.html.Option;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,6 +33,7 @@ public class AuthService {
     private final UserInfoJpaRepository userInfoJpaRepository;
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
     private final JwtTokenGenerator jwtTokenGenerator;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthResponseDTO getJwtToken(Authentication authentication, HttpServletResponse response) {
         try {
@@ -111,5 +115,37 @@ public class AuthService {
                 new SimpleGrantedAuthority(role.getRoleName())).toList();
 
         return new UsernamePasswordAuthenticationToken(userEntity.getUsername(), userEntity.getPassword(), grantedAuthorities);
+    }
+
+    public AuthResponseDTO registerUser(UserRegistrationDTO userRegistrationDTO, HttpServletResponse response) {
+        Optional<UserEntity> existingUserEntity = userInfoJpaRepository.findByUsernameOrEmail(userRegistrationDTO.getUsername(), userRegistrationDTO.getEmail());
+
+        if(existingUserEntity.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists !");
+        }
+
+        UserEntity userEntity = userRegistrationDTO.convertToEntity();
+
+        //Encode password before persisting in database
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        var savedUserEntity = userInfoJpaRepository.save(userEntity);
+
+        Authentication authentication = getAuthenticationObject(userEntity);
+        String jwtToken = jwtTokenGenerator.generateJwtToken(authentication);
+
+        var refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
+
+        //Persist this refresh token in database
+        persistRefreshToken(refreshToken, userEntity);
+
+        //We will add refresh token in Http-Only cookie
+        createRefreshTokenCookie(refreshToken, response);
+
+        return AuthResponseDTO.builder()
+                .accessToken(jwtToken)
+                .accessTokenExpiry(15 * 60)
+                .username(savedUserEntity.getUsername())
+                .tokenType(TokenType.Bearer)
+                .build();
     }
 }

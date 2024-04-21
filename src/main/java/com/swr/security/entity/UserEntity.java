@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = DatabaseConstant.User.TABLE_NAME)

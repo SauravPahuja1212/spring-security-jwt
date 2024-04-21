@@ -1,6 +1,7 @@
 package com.swr.security.controller;
 
 import com.swr.security.dto.AuthResponseDTO;
+import com.swr.security.dto.UserRegistrationDTO;
 import com.swr.security.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,5 +31,11 @@ public class AuthController {
     @PreAuthorize("hasAuthority('REFRESH_TOKEN')")
     public ResponseEntity<AuthResponseDTO> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         return ResponseEntity.ok(authService.getJwtTokenFromRefreshToken(authHeader));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDTO> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO
+            , HttpServletResponse response) {
+        return ResponseEntity.ok(authService.registerUser(userRegistrationDTO, response));
     }
 }
